@@ -1,10 +1,14 @@
 export default class Model {
 
-  constructor(data = []) {
-    this.$collection = [];
+  constructor(options) {
+    const data = options.data || [];
+    delete options.data;
 
-    if (data.length)
-      this.record(data);
+    this.$collection = [];
+    this.$options = Object.assign({ pk: 'id' }, options);
+
+
+    if (data.length) this.record(data);
   }
 
   all() {
@@ -12,7 +16,7 @@ export default class Model {
   }
 
   record(data) {
-    const pk = 'id';
+    const pk = this.$options.pk;
     const mappedData = data.map(entry => ({
       ...entry,
       [pk]: entry[pk] || Date.now()
@@ -21,16 +25,14 @@ export default class Model {
   }
 
   find(key) {
-    const pk = 'id';
-    const entry = this.$collection.find(entry => entry[pk] === key);
+    const entry = this.$collection.find(entry => entry[this.$options.pk] === key);
     return entry
       ? Object.assign({}, entry)
       : null;
   }
 
   update(key, data) {
-    const pk = 'id';
-    const index = this.$collection.findIndex(entry => entry[pk] === key);
+    const index = this.$collection.findIndex(entry => entry[this.$options.pk] === key);
 
     if (index < 0) return false;
 
